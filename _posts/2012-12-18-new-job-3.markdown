@@ -1,0 +1,22 @@
+---
+layout: post
+title: ! 'Job.create(company: "BFG Communications")'
+published: false
+date: 2012-12-18
+categories: []
+---
+Two years later, and it's on to the next one. I started a job with a new kind of company doing a new kind of job. BFG is a creative agency, dealing with a lot of really cool companies and products. They started in the traditional print and personal ad space and have, in the past 6 years or so, moved into the digital space via interactive design, primarily on the web. It's an odd position for me for a number of reasons, the primary one being that their main technology stack is all Microsoft based, in the form of .NET / PHP. ***Horrors***
+
+
+But seriously… why those two!?!
+
+
+But I kid. There are a lot of really smart people doing some amazing work in this space. What's even cooler is I've gotten to write my own job description for what I will be doing. My official title is "Software Engineer" which to most people means "developer". But in this case, I will end up wearing a wide variety of hats.
+
+
+My primary roles will be to provide the following:
+
+
+
+* Provide visibility into the company's process via tools to track work items and create data-driven stories about how the company's pipeline actually works. There is currently no way to do this, so I get to build awesome tools!
+* Create developer happiness through teaching better development patterns and design and building reusable components while cutting out as much "reinventing the wheel" as possible.
