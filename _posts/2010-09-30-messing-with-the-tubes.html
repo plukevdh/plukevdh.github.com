@@ -1,0 +1,41 @@
+---
+layout: post
+title: Messing with the Tubes
+published: true
+date: 2010-09-30
+categories: []
+posterous_url: http://blog.hungerandthirstdesign.com/post/1215411972/messing-with-the-tubes
+posterous_slug: post/1215411972/messing-with-the-tubes
+---
+<p>So Kthxbye takes a turn to the even more experimental. The last big step of this whole project is to take the data coming back from the workers and notify the user that their data is ready and/or doing something on the client side with that data. If that sounds hard, the answer is actually under 100 lines of code (if you don&rsquo;t count the supporting libraries). Its an incredibly&nbsp;versatile&nbsp;solution for&nbsp;asynchronous, server-driven page content updating. Push notifications for the web if you will.</p>
+<p>However, this trip gets pretty crazy&hellip; and doesn&rsquo;t work quite right yet, at least not in&hellip; dun-du-dun&hellip; Internet Explorer. But that&rsquo;s another problem to solve as we go along (<a href="http://stackoverflow.com/questions/3825271/socket-io-node-js-rails-3-ie" target="_blank">http://stackoverflow.com/questions/3825271/socket-io-node-js-rails-3-ie</a>).</p>
+<p>So there is now a second optional module to add to Kthxbye when using it behind a Rails application. I&rsquo;ve designed a slick little notification widget that will be updated in realtime when the job gets picked up to be worked, once it completes or fails. All you&rsquo;ll need to do in the end is include a CSS file, a javascript file and a</p>
+<p><code> &lt;div id='kthxbye'&gt;&lt;/div&gt; </code></p>
+<p>tag to your html or other markup and you&rsquo;ll get this (or well, the first of the four blocks).</p>
+<p>&nbsp;[[posterous-content:gjerkuFGnkteaEdonGEb]]</p>
+<p>Then once you startup a worker, it&rsquo;ll change the colors of the lights based on the status of the job.</p>
+<p>How does this work? Its a three layered system. Kthxbye uses Redis&rsquo; PUBSUB protocol to publish a message to the &ldquo;job.*&rdquo; channel, where &ldquo;*&rdquo; will be success|failed|active. There is then a Node.js server sitting in-between the Rails app and Redis that subscribes to the &ldquo;job.*&rdquo; channel waiting for messages to come down. The message currently only contains a single number with the original job id that it was queued under, this way when the clients receive the message, they can filter for what message they want on the client-side rather than opening up potentially infinite number of channels for each job, which as it appears from the Redis docs would ultimately slow down publishing to the messaging queues as per this specification:&nbsp;</p>
+<blockquote>
+<p>publish is O(N+M) where N is the number of clients subscribed to the receiving channel, and M is the total number of subscribed patterns (by any client). Psubscribe is O(N) where N is the number of patterns the Psubscribing client is already subscribed to.</p>
+<p>(<a href="http://code.google.com/p/redis/wiki/PublishSubscribe" target="_blank">http://code.google.com/p/redis/wiki/PublishSubscribe</a>)</p>
+</blockquote>
+<p>So we go with three main channels: job.active, job.failed, job.success. There may be more in the future and someone can please feel free to correct me if my logic is wrong there.</p>
+<p>So why the Node.js server in between? Why not poll ourselves from the app itself and update when we get the messages? A few reasons:</p>
+<ol>
+<li>WebSockets are awesome. Incredibly lightweight and fantastic for not chewing up resources while we wait for content.</li>
+<li>Node.js is an evented server implementation which is much cleaner when waiting for responses in a deferrable fashion. It also ties in really nicely with Socket.IO and Redis already.</li>
+<li>Node.js is a lot less memory intensive (especially during idle time) and allows us to hold our polling mechanism in one location decreasing the load on Redis and our clients at the same time. This decreases load on both Redis and the Rails server allowing a server made for the sole purpose of handling these types of requests in an amazingly efficient fashion&hellip; do just that.</li>
+<li>I needed a good reason to play with Node.js too. This was it.</li>
+</ol><p>So why Socket.IO?</p>
+<ul>
+<li>It allows for clean failover in the event that one protocol is not supported by a browser. It supports WebSockets, Adoble Flash Sockets, ActiveX HTMLFile and xhr multipart and xhr polling requests. It successively falls through each type until one works. Obviously WebSockets is the best of these options, but its really handy to have the other protocols while other browsers are bringing up their support of WebSockets (and as the WebSockets protocol is being finalized: <a href="http://dev.w3.org/html5/websockets/" target="_blank">http://dev.w3.org/html5/websockets/</a>).</li>
+<li>Sockets are better sending data back and forth in an evented style rather than using a strict polling technique. Direct communication is just awesome&hellip;</li>
+</ul><p>So all in all, this is pretty cool. Making lights change on 5 different browsers on 2 different machines with one command is pretty awesome. Just a few things to wrap up and we&rsquo;re golden to release the next stage in Kthxbye. Obviously this whole piece is pretty optional as you can always find another way to get your data back later on at your own time. This is just the way we tell the users, hey, your data is done. Come and get it!</p>
+<p>A few things to note in the implementation details that are not well documented.&nbsp;</p>
+<p>Socket.IO is a bit tricky to get working with Rails. Rails handles GET requests for resources as well (unless you tell it otherwise) and Socket.IO has a number of paths hardwired (or set via JS variables) to look for the resources that it runs on (mostly other javascript files). Definitely follow the install instructions regarding getting recursive resources. For my current project, I had to include the socket.io directory in the public/ dir rather than the javascripts/ directory in public/. This can probably be gotten around but Rails complains that it cannot route some of the files. Its probably just an inclusion/paths issue on my side though. It just all started working once I moved it there, so I&rsquo;ll leave it there until I start to move some of the custom stuff out of the Rails app and back into the plugin.&nbsp;io.setPath() apparently no longer exists which is pretty confusing, especially since the tutorial on the main page claims that&rsquo;s the way to denote the socket.io libs if not serving it directly from Node.js).</p>
+<p>Also, watch your proxies. Should be a given but I tried running this locally on two separate machines on our internal network and everything broke until I got the proxies working right&hellip; Stupid but a good reminder all the same.</p>
+<p>The Flash socket protocol requires having port 843 open. Apparently that&rsquo;s Adobe&rsquo;s standard Flash port. I&rsquo;m not sure this is working yet anyways, apparently the flash sockets are fairly sensitive&hellip;</p>
+<p>Beyond that and some unsolved issue regarding why the flash sockets are still not working, this is a pretty intense project that has opened up a lot of new technology to me. Definitely will be using the redis/node.js combo a lot more in the future.&nbsp;</p>
+<p><strong>UPDATE:</strong></p>
+<p>Rergarding the websockets issue, apparently, once you have all the paths correct to the .swf file that runs the websockets AND (very important and, up until the most latest release, undocumentedly), you MUST RUN YOUR NODE SERVER AS ROOT in order to get flashsocket support, which IE supports. Boom. All browsers now supported!</p>
+<p>I do still have to add a symlink to my socket.io dir in my public/ dir in the rails app in order for GET requests to the flash file to work correctly. I may end up submitting a bug for that although it may be just something to work around with the way Rails serves files.</p>

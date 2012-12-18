@@ -1,0 +1,44 @@
+---
+layout: post
+title: Designing for Change
+published: true
+date: 2011-08-18
+categories: []
+posterous_url: http://blog.hungerandthirstdesign.com/post/9067560580/designing-for-change
+posterous_slug: post/9067560580/designing-for-change
+---
+<p>I promised some people via twitter that I was going to post again on discoveries regarding client-side rendering, but this is not that post. Instead, I&rsquo;ve decided to branch into a mix of design and engineering related thoughts that I&rsquo;ve been working on as a result of some interesting issues while going through the latest design iteration of several of the interfaces of SalesCrunch&rsquo;s <a href="http://www.crunchconnect.com" target="_blank">CrunchConnect</a> platform.</p>
+
+<h2>A Real Life Example</h2>
+
+<p>Our product, as I have noted before, is a presentation and tracking tool, purposed to allow users to present slide decks, normally as part of a sales presentation and provide the presenter with tracking metrics both in live (presenter-driven) and emailed (viewer-driven) meetings or presentations. As part of this, we allow the users to upload and/or select decks for use in presentations or to send to users. We have an interface for doing this that used to exist in two parts: One for uploading, naming and organizing decks, the other for selecting decks for use. As part of one level of redesign, these two interfaces were forced together so that, during a live meeting, a presenter could both upload <em>and then use</em> a deck during a live meeting. The result looked something like the following two screens.</p>
+
+<p>[[posterous-content:GdzJgHItbfFEhCniAsbq]]
+Image 1: The Original Selection Screen</p>
+
+<p>(Please ignore the design flaws, some of these shots were of prototype interfaces.)</p>
+
+<p>The main thing I want to note here is the input and submit controls. In the above shot, we have two main controls for selecting a deck: A <code>&lt;select&gt;</code> element for selecting a deck and a select button for submitting the choice. These elements are within an ajax-form that submits the chosen deck for use in the existing context. Not too complicated. The biggest challenge of this interface is that we need to know the deck id, title and unique slug. These three pieces are needed for either UI updates after the deck is selected or to send back up to the server to track what deck is being used in the presentation. In the select, the id and title are in the standard <code>&lt;option&gt;</code> value and text values. The slug is stored as an html <code>data-*</code> attribute on the option for easy retrieval later. So this is fairly straightforward, and the systems surrounding the UI updates and server actions are pretty simple.</p>
+
+<p>The problem shows up when our design/product team decides the interface is not very straightforward, and I agree, mainly in the separation of the select/upload flow. Our new design separates out the two into separate tabs as seen here:</p>
+
+<p>[[posterous-content:yquovwDcJeokGfyiJhGF]]
+Image 2: The New Selection Screen</p>
+
+<p>This makes it easy to see here are my decks and if I need more, I go to the upload tab, there are no major redirections or interface changes.</p>
+
+<p>The problem is the redesign moves all of the data we depend on to update the interface around. Note the input and submit count change. We go to zero inputs and <em>n</em> submit buttons where <em>n</em> equals the number of decks. Moreover, we actually lose the form altogether and go with ajax-actioned buttons which send the same action as the form in the end. So we&rsquo;ve just added a much larger number of submits/actions for the user to choose from. While I could debate the value of this idea, the point of this post is elsewhere.</p>
+
+<p>This new design has not just changed the page layout, but also the landscape of where the information is stored on the page. Now instead of being in a single input, the data is scattered to the individual submits. This means we have to change where we go to retrieve all the information needed to update the ui and inform the server. That means hours of refactoring JS UI handlers/submitters on top of the extensive html UI changes.</p>
+
+<p>So my thought is this: How can we design a screen like this to make the UI wildly flexible while ensuring the backend will work the same (or at least nearly the same). UI tied up with large amounts of data means double the work untying it from the data so that we can tie the data back to new UI elements. Part of the answer lies in the classic separation of UI and data in the M and V pieces of the MVC design pattern. Embedding a lot of data within a view is already a bad idea. It&rsquo;s partly unavoidable for some client-side purposes, but there is still a need for keeping process-dependent data out of specific view elements. Perhaps if we just used ids within the view and link back to the data store within JS objects. Backbone.js is an excellent library to aid in keeping this design paradigm for JS-heavy interfaces.</p>
+
+<p>The other piece of the answer lies in simply designing for change. Designers love to tweak things, move elements around, change entire screens for the next design iteration. In the case of this design change, our inputs and submits change a great deal, but the server-provided data and the data expected on submit is exactly the same in both cases: id, title and slug. Only the layout changed. If we design for change, all we&rsquo;d need to do is move the html around, fix up some css and hopefully tie a minimal amount of data to each new element so that when the submit is clicked, the same data is collected for the UI and server updates as when we had a single input/submit pair.</p>
+
+<h2>What are some strategies for doing this?</h2>
+
+<ol>
+<li>As mentioned, store the data off of the view, in a &ldquo;persistent&rdquo; JS collection of some sort.  This could be retrieved and stored along with the initial server page render or in later ajax requests as the data is needed. In our case, we collect most of the deck data in an &ldquo;infinite scroll&rdquo; method, only generating deck rows as you scroll down a few rows.</li>
+<li>Let the server handle the data and just request new info as needed. No need to store anything client-side if you don&rsquo;t want, just submit an id and let the server figure out what happens and have it render and push back up the update UI. I don&rsquo;t recommend this as much as it increases server traffic and most of this stuff can be handled with data retrieved on the first page request or subsequent &ldquo;page initialization&rdquo; requests.</li>
+<li>Store the data on the page and pull it out as needed, just don&rsquo;t tie it to a single element. HTML5&rsquo;s addition of data-* attributes is an awesome way to store stuff on page, but when you tie it to changing elements, it can be a nightmare to move things around. Instead, put the data somewhere on the page, the body or other non-visible elements for later retrieval so that if the page changes, the data will still be available. </li>
+</ol><p>So the next time your product/design team says &ldquo;Can you radically alter the design for this view?&rdquo; you should be able to tell them &ldquo;Give me an hour&rdquo;. When they ask you how you can do that in such short order, you&rsquo;ll be able to tell them it&rsquo;s because you designed it to change.</p>

@@ -1,0 +1,31 @@
+---
+layout: post
+title: Back again.
+published: true
+date: 2010-09-01
+categories: []
+posterous_url: http://blog.hungerandthirstdesign.com/post/1047905729/back-again
+posterous_slug: post/1047905729/back-again
+---
+<p>Couple of posts upcoming.</p>
+
+<p>First one will be on a mini-app I&rsquo;m working on for Hargray. Its just kinda a shout-out to a cool little helper for Textile forms. Hargray peeps needed a quick way to do email blasts, since the Oracle Forms stuff doesn&rsquo;t give a slick/easy way to format emails. So I got the request to build a simple form for emailing stuff to customers.</p>
+
+<p>Well I&rsquo;ve become a big fan of Textile. I use it right here for formatting my blog entries right here. Its just a super slick way to format text without the craziness of HTML markup. Plus its a little more intuitive for non-technical users. At first I figured, hey, I&rsquo;ll just point email creators at the textile formatting guide and they can do all the markup by hand. But lo and behold, I found felttippens Textile-Editor-Helper. It adds a nifty little editor bar with a lot of the markup tools you&rsquo;d expect to see so that you can simply press the button and it generates the markup for you.</p>
+
+<p>Then I wanted to give the users a way to preview the actual email content before sending, so I created a little helper that does the following</p>
+
+<p><code>
+<p>&nbsp;&nbsp;$("#render_preview").click(function (e) {</p>
+<p>&nbsp;&nbsp; &nbsp;e.preventDefault();</p>
+<p>&nbsp;&nbsp; &nbsp;$('.preview').load("preview", {text:$("#email_blast_message").val()}); &nbsp;</p>
+<p>&nbsp;&nbsp;});</p>
+<p>:textile</p>
+<p>&nbsp;&nbsp;#{@text}</p>
+<p>&nbsp;&nbsp;def translate</p>
+<p>&nbsp;&nbsp; &nbsp;@text = params[:text]</p>
+<p>&nbsp;&nbsp; &nbsp;render "shared/translate"</p>
+<p>&nbsp;&nbsp;end</p>
+</code></p>
+<p>Which is a super fast way of ajaxing the text-area text to an ActionController::Metal action, which faster than thought possible, returns the HTML output version of the Textile markup&rsquo;d text! Its incredibly fast since I&rsquo;m only using Metal rather than a full ActionController object. Plus its very simple in what it does, so I&rsquo;m pretty happy with how it worked out. Check out what it looks like!</p>
+<p>[[posterous-content:yahilmbvnDwdtAofxsqb]]</p>

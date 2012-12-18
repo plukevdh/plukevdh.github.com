@@ -1,0 +1,20 @@
+---
+layout: post
+title: ! 'IE Gotcha #3'
+published: true
+date: 2010-09-01
+categories: []
+posterous_url: http://blog.hungerandthirstdesign.com/post/1047070622/ie-gotcha-3
+posterous_slug: post/1047070622/ie-gotcha-3
+---
+<p>Continuing the rant&hellip;</p>
+
+<p>So I already knew IE7 didn&rsquo;t respect the inline-block property. That sucks. Its really hard to do some types of layout without that property. So what to do?</p>
+
+<p>Believe it or not, this hack works (from flipc.blogspot.com). Just add:</p>
+
+<p><code> zoom: 1; *display: inline; _height: 30px; </code></p>
+
+<p>to the end of your styling for the element you need inline-block to work for. It doesn&rsquo;t screw with Firefox or even IE8 (which handles inline-block just fine&hellip;).</p>
+
+<p>So moral of the story is still don&rsquo;t use IE. Period. Solution one is Mozilla&rsquo;s Firefox. Solution 2 is at least ie6update.com</p>

@@ -1,0 +1,16 @@
+---
+layout: post
+title: I Love Specs
+published: true
+date: 2011-10-26
+categories: []
+posterous_url: http://blog.hungerandthirstdesign.com/i-love-specs
+posterous_slug: i-love-specs
+---
+<p><span style="font-size: medium;">Alternately titled: How I learned to hate the player, not the game.</span></p>
+<p>&nbsp;</p>
+<p>So I was wrong. There, I said it. Specs are awesome. When written write, in a good language (because fuck Cucumber man), and in isolation, they are a beautiful thing. I've really started to dig TDD. What changed my mind?&nbsp;</p>
+<p>Well a few things. One to many changes implemented with unexpected consequences to the rest of the system was a big one. Which, that in itself is another problem altogether. That is a problem of badly coupled code, a problem we are working to <a href="http://cluttered-code.posterous.com" title="Cluttered Code" target="_blank">resolve elsewhere</a>.</p>
+<p>Another is being able to better flush out the spec. Our specs are written by technical people, but often times, the implementation details don't show up until you're, well implementing the damn thing. But this comes a step earlier if you write tests first. Tests tell you how it ought to work, and when you realize you don't know how it ought to work, you have to ask. So you clear up a lot of misunderstandings before you are in the middle of writing the feaure and realize it all has to be redone because your understanding of the implementation was wrong.</p>
+<p>Lastly, it gives you a reference point to say "Here's how it worked, was supposed to work, or how it will work." Then you can go forth and change either the spec, or the code (one at a time please), and ensure that it either continues to work as before, or that the spec has changed and needs to now represent the new functionality.</p>
+<p>In any case, I am a reformed developer, now a believer in testing and TDD. Go forth and do likewise.</p>

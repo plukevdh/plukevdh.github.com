@@ -1,0 +1,16 @@
+---
+layout: post
+title: Better testing (framework) is better
+published: true
+date: 2011-06-02
+categories: []
+posterous_url: http://blog.hungerandthirstdesign.com/post/6108505609/better-testing-framework-is-better
+posterous_slug: post/6108505609/better-testing-framework-is-better
+---
+<p>Not long after my last post, our group made a move to use RSpec more than we previously had. We have written (and in some cases still write) a LOT of our tests in <a href="http://cukes.info/" target="_blank">Cucumber</a>, which is a plain-text, behavior-driven syntax. At the same point that we made this change, I had the chance to update some code on another couple of projects (that we were using) and needed to update the specs. RSpec specs. It was really fast and in about 8 lines of code, I had them done.</p>
+
+<p>Because of this, I realized something: RSpec is really simple! Cucumber tests require me to write big complex setup steps, helper steps, parser steps&hellip; steps, Steps, STEPS! Rspec? Not so much. There is some initial work but in the end, it was a whole heck of a lot easier to write in a Ruby way, rather than an English sort of way. This is always one of the biggest debates back and forth in the Cuke/no Cuke worlds.</p>
+
+<p>From a developer standpoint, I want to write code. I want to write in the language I&rsquo;m used to writing with every day. Plain-text is not as intuitive, because you have to make that plain-text mean something. It&rsquo;s like writing your tests twice. They say that it&rsquo;s great if you&rsquo;re running the specs by non-technical people, but in our case and, I&rsquo;d guess in 90% of the cases out there, we&rsquo;re not. We&rsquo;re just doing it because it <em>seems</em> easier initially.</p>
+
+<p>That&rsquo;s really all I had on that for now. Feedback on this one is definitely welcome.</p>

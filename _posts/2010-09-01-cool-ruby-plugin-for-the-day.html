@@ -1,0 +1,16 @@
+---
+layout: post
+title: Cool ruby plugin for the day...
+published: true
+date: 2010-09-01
+categories: []
+posterous_url: http://blog.hungerandthirstdesign.com/post/1047058644/cool-ruby-plugin-for-the-day
+posterous_slug: post/1047058644/cool-ruby-plugin-for-the-day
+---
+<p><a href="http://0xcc.net/ruby-progressbar/" target="_blank">Ruby Progressbar</a>: This little bugger is a really simple way to create a textual progress bar for your long-running ruby scripts. I&rsquo;m working on a script that takes about 30-45 minutes to run. It does some file parsing and then querying of a web service based on the parsed values for reconciliation purposes. The thing is, the web service query takes about 3-5 seconds per query and we&rsquo;re querying over 7000 records (which means we&rsquo;d be talking about 7.5 hours to do this if we weren&rsquo;t also doing some multithreaded magic).</p>
+<p>I&rsquo;m actually planning to run this thing in a few different ways out of personal curiousity. I want to run this in Ruby 1.9.1 with threads and compare that with the time it takes to fork individual processes out for each query. Right now, I&rsquo;m running it with 15 threads (although I haven&rsquo;t worked to figure out what an optimum number of threads is).</p>
+<p>I also want to see what happens if I load up MacRuby&rsquo;s implementation of Ruby 1.9.0 and run it under it&rsquo;s GCD support to see how that compares against the other two. Although I suspect if I&rsquo;m forking out individual processes, the GCD would be handling those processes anyways? I&rsquo;m not intimate with the workings of GCD normally or under MacRuby. Time to research!</p>
+<p>But for now, a screenshot of the progress bar thinger for Ruby scripts. Implementation details are on the script&rsquo;s website.</p>
+<p>[[posterous-content:FetjClCyChtFgJIhGDke]]</p>
+<p>Update:</p>
+<p>Totally forgetting what I learned in parallels class with the idea of trying to use Ruby&rsquo;s Process library. Process doesn&rsquo;t have a clean way to aggregate results from processes. It simply spawns off another Ruby instance, runs the given block and exits. So it looks as though if I want to create a concurrent execution version, I will need to either use a whole separate process spawning library&hellip; or MacRuby&rsquo;s GCD. I think we&rsquo;ll give GCD a chance first.</p>

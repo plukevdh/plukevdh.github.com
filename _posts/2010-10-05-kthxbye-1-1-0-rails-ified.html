@@ -1,0 +1,14 @@
+---
+layout: post
+title: Kthxbye 1.1.0 - Rails-ified
+published: true
+date: 2010-10-05
+categories: []
+posterous_url: http://blog.hungerandthirstdesign.com/post/1249365580/kthxbye-1-1-0-rails-ified
+posterous_slug: post/1249365580/kthxbye-1-1-0-rails-ified
+---
+<p>Well 6 weeks worth of work on this baby and we now have a fully self-contained distributable project with slick Rails integration.</p>
+<p>The initial release of Kthxbye focused on the machine behind the gem: the queuing processing of jobs. This release is more of a front-end and Rails&nbsp;compatibility&nbsp;release. This gem extracts out a lot of the built-in functionality that I had built around the gem into the primary application this gem was built to enhance. Mostly it involves the work I&rsquo;ve been doing with Node.js and Socket.IO. It&rsquo;s really simple code and if you want a look at the Node notification engine, it&rsquo;s <a href="http://github.com/plukevdh/kthxbye-node" target="_blank">here</a>. There&rsquo;s a lot of new documentation added to the README file which ought to help you figure out how it works and what all needs to be installed.&nbsp;</p>
+<p>This is also my first experiment in Rails 3 &gt; Railtie gemification. Railtie is really powerful engine an unfortunate few undocumented secrets (like that all generators apparently need to be named &ldquo;&lt;name&gt;_generator.rb&rdquo; in order to be picked up by Rails automatically). In any case, this gem is now super easy to integrate into your project that needs delayed job computation and callback notifications.</p>
+<p>What&rsquo;s next? Well, probably more features, a few enhancements, better reporting, and more slick ways to interact with Kthxbye.</p>
+<p>Check it out now with &ldquo;gem install kthxbye&rdquo;. Enjoy all!</p>

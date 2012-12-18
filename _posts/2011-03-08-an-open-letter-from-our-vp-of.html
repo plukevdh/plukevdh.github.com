@@ -1,0 +1,22 @@
+---
+layout: post
+title: An open letter from our VP of Engineering
+published: true
+date: 2011-03-08
+categories: []
+posterous_url: http://blog.hungerandthirstdesign.com/post/3723792894/an-open-letter-from-our-vp-of-engineering
+posterous_slug: post/3723792894/an-open-letter-from-our-vp-of-engineering
+---
+<p>We&rsquo;re a Rails application hosted on Heroku.  As the demand for access to our system increased, our ability to auto-scale failed.</p>
+
+<p>Our original auto-scaling technique was wired into rack to monitor queue lengths at timed intervals.  The problem with our code was it wasn&rsquo;t that smart with scaling up and then back down.  It would scale up real fast for workers under very little load and then stay high for some time before coming back down because it was fairly conservative.  It didn&rsquo;t work well with dynos at all, there was usually a long delay to warm up new dynos when requests started queuing.  Mainly because of a mutex problem with who owns the rights to change the dyno count?</p>
+
+<p>HeroScale was then released and we switched to that for some time until&hellip; they couldn&rsquo;t process custom URLs.  Our URL path to the server isn&rsquo;t at heroku.com as most applications can be found.  We have a little bit of rack middleware to verify the URL of our site since we will be introducing 3rd level domain names for personalized sites at some point.  The middleware interferes with HeroScale&rsquo;s ability to adjust settings and so we had to dump HeroScale a few weeks ago.  Additionally, HeroScale is based on the assumption that it can hit your web site&rsquo;s status page at /heroscale/status.  Unfortunately for us, that URL was offline due to the traffic spike and DDoS like characteristics of being Slashdotted.  So even if we had it running, it wouldn&rsquo;t have worked.</p>
+
+<p>The solution?</p>
+
+<p>We&rsquo;re researching auto-scaling via resque-scheduler and resque workers, which if works, we&rsquo;ll release on github.  When we first developed our custom solution, we were still on DelayedJob and we didn&rsquo;t have a scheduling option - only daily and hourly crons.  By switching to a worker based solution, we hope to build out a god-like monitor for the cloud running on the cloud.  If the site becomes under load or simply unavailable, crank it up!</p>
+
+<p>Without hosting ourselves, the ability to monitor other people&rsquo;s resources is an interesting problem.  You have the power to scale, which is a benefit of the cloud, but only to the extent that the vendor&rsquo;s tools allows.  It would be nice if Heroku did provide auto-scaling, and I&rsquo;m interested in DuoStack which will provide auto-scaling.  Once their services reach a certain level of maturity, we may switch providers but for now - we&rsquo;ll have to roll our own, keep monitoring everything, and tweak as we go.</p>
+
+<p>A normal day for any geek in a startup: developer + sysadmin == lots to do!</p>

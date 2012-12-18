@@ -1,0 +1,23 @@
+---
+layout: post
+title: Kthxbye 1.0.0
+published: true
+date: 2010-09-23
+categories: []
+posterous_url: http://blog.hungerandthirstdesign.com/post/1174317195/kthxbye-1-0-0
+posterous_slug: post/1174317195/kthxbye-1-0-0
+---
+<p>Hey all. quite pleased to introduce the &ldquo;final&rdquo; version of my latest project, Kthxbye. As I wrote about in the last few blog posts, this gem allows you farm out long running processes that you need a result from to a separate processing engine so that you don&rsquo;t have to tie up your web-server with long running processes.</p>
+<p>This doubtlessly will have many revisions in the future but it took me so long to finalize the initial API that I wanted to solidify something for an initial release. This library is fully tested for Ruby 1.8.7 and 1.9.2.&nbsp;</p>
+<p>[[posterous-content:dgHmfgBHgoFreGqIlEDz]]</p>
+<p>It has a pretty slick web front-end too. Lots of useful information to display as well as a live polling feature which refreshes the data on the screen every 2 seconds.</p>
+<p>[[posterous-content:AwddHqhowJzfxtbzvAsc]]</p>
+<p>It also gives you good indication as to what the status of the job is, when it&rsquo;s completed, whether or not it succeeded or failed. This is all available through the API, and therefore, to your app as well.</p>
+<p>[[posterous-content:sGofbgqHpChsgyDaacJu]]</p>
+<p>The interface is built on Sinatra and should be pretty easy to integrate into your Rails app stack (made especially easy in Rails 3).</p>
+<p>So how about some comments on the project? This is my first time doing any kind of major unit testing. Definitely will be doing more of this in the future. Incredibly helpful to know when I broke something earlier, caught so many more exceptions and edge cases I might have otherwise missed. Obviously that&rsquo;s the point of unit testing, but it was cool to see just how helpful it was long term.</p>
+<p>Where to get this sugary goodness?</p>
+<p><a href="http://github.com/plukevdh/kthxbye" target="_blank">Code</a>&nbsp;or <a href="https://rubygems.org/gems/kthxbye" target="_blank">Gem</a></p>
+<p>Documentation is soon to follow. In fact, it exists, it just needs to be better. Undocumented code is almost as useless as no code&hellip;&nbsp;</p>
+
+<p><strong>UPDATE: </strong>Docs now available via <a href="http://rdoc.info/github/plukevdh/kthxbye/" target="_blank">rdoc.info</a>, courtesy of github service hooks!</p>

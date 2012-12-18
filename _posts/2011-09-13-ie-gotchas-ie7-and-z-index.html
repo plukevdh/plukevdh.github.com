@@ -1,0 +1,30 @@
+---
+layout: post
+title: ! 'IE Gotchas : IE7 and z-index'
+published: true
+date: 2011-09-13
+categories: []
+posterous_url: http://blog.hungerandthirstdesign.com/ie-gotchas-ie7-and-z-index
+posterous_slug: ie-gotchas-ie7-and-z-index
+---
+<p>We have a lot of layers going on in our meeting UI. Fortunately, most of it is not overlapping. But in the odd case where we need to overlay something and it&rsquo;s not taking over the whole page (like a lightbox or other popup), we have to ensure that it layers properly. Usually this is done with a mix of <code>position: absolute</code> and <code>z-index</code>. However, this is not the case in IE7. IE7 has this funny issue where it starts a new zero-indexed layer <em>with each positioned element</em> (detailed at <a href="http://www.quirksmode.org/bugreports/archives/2006/01/Explorer_z_index_bug.html">quirksmode.org</a>). So you do this:</p>
+
+<div class="CodeRay">
+  <div class="code"><pre><span class="type">div</span><span class="class">.parent</span> { <span class="key">position</span>: <span class="value">relative</span>; }
+<span class="type">div</span><span class="class">.parent</span> <span class="type">div</span><span class="class">.child</span> { <span class="key">position</span>: <span class="value">absolute</span>; <span class="key">z-index</span>: <span class="float">100</span>; }</pre></div>
+</div>
+
+
+<p>and the layer as a whole, is still at z-index 0! So everything within the parent element will still be below other page elements</p>
+
+<h2>Oh snap.</h2>
+
+<p>The fix is simple. Give the parent element an even higher z-index. So it becomes:</p>
+
+<div class="CodeRay">
+  <div class="code"><pre><span class="type">div</span><span class="class">.parent</span> { <span class="key">position</span>: <span class="value">relative</span>; <span class="key">z-index</span>: <span class="float">110</span>; }
+<span class="type">div</span><span class="class">.parent</span> <span class="type">div</span><span class="class">.child</span> { <span class="key">position</span>: <span class="value">absolute</span>; <span class="key">z-index</span>: <span class="float">100</span>; }</pre></div>
+</div>
+
+
+<p>This should give you the proper layering.</p>

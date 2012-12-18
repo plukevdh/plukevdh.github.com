@@ -1,0 +1,16 @@
+---
+layout: post
+title: Bettering Rails Pagination
+published: true
+date: 2011-06-14
+categories: []
+posterous_url: http://blog.hungerandthirstdesign.com/post/6528715761/bettering-rails-pagination
+posterous_slug: post/6528715761/bettering-rails-pagination
+---
+<p>Got assigned an interesting problem today involving pagination with nested routes. We do a lot of nested routes, for example</p>
+
+<script src="https://gist.github.com/1025621.js?file=example1.rb"></script><p>When you go to paginate, the initial page url looks right (e.g. <code>example.com/companies/my-company/activities</code>). However, the pagination links (for both <a href="https://github.com/mislav/will_paginate" target="_blank">WillPaginate</a> and <a href="https://github.com/amatsuda/kaminari" target="_blank">Kaminari</a>) end up formatting so that we end up being sent to <code>/activities?company_id=my-company&amp;page=2</code>, which works, but is not very consistent or user-friendly. What to do?</p>
+
+<p>I researched a bit, and found the following StackOverflow <a href="http://stackoverflow.com/questions/2088479/restful-pagination-routes-using-will-paginate" target="_blank">question/answer</a>,</p>
+
+<p>This <em>ought</em> to be a default deal in any pagination solution out there, but it does not appear to be. It&rsquo;s just nice that the paginators are so flexible. It would be nicer if they worked by default though&hellip; Fork time.</p>

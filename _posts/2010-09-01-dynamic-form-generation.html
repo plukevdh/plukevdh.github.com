@@ -1,0 +1,103 @@
+---
+layout: post
+title: Dynamic form generation
+published: true
+date: 2010-09-01
+categories: []
+posterous_url: http://blog.hungerandthirstdesign.com/post/1047893587/dynamic-form-generation
+posterous_slug: post/1047893587/dynamic-form-generation
+---
+<p>Interesting app for Hargray Communication this past few weeks. I was asked to design a dynamic survey application that is built, more or less, based on a configuration stored in a database. This is so we can have a front-end application in Oracle that allows, say, non-technical marketing people to build a survey from a form, and then it generates a set of web pages allowing the customer to take the survey.</p>
+
+<p>So that&rsquo;s what I did:</p>
+<p>[[posterous-content:DAxJvyyvAIrBsboDdAzr]]</p>
+
+<p>This is a fairly simple app on the whole. Solely purposed to allow customers to take surveys based on a link we send them. So why am I mentioning this?</p>
+
+<p>Because dynamically generated apps are cool!</p>
+
+<p>I originally did this with helpers that took the name of the question type (something like &ldquo;single_choice&rdquo; for radio buttons, &ldquo;comment&rdquo; for a multiline text area, etc.) and then an eval statement to call the right helper method. That made for some messy code in the helper. So I switched to using a set of partials instead, with the same names as what I have in the example above. This way I can do:</p>
+
+<p><code> </code></p>
+<p><code> </code></p>
+<p><code> </code></p>
+<p><code>
+<p>= render "shared/#{question.survey_question_type["sqy_code"].downcase}", :locals =&gt; {:form =&gt; f, :quest =&gt; question}</p>
+</code></p>
+<p>and get show the question. The radio-button partial looks simply like:</p>
+
+<p><code>
+<p>- locals[:quest].survey_answers.each do |a|</p>
+<p>&nbsp;&nbsp;= locals[:form].radio_button(locals[:quest]["sqt_name"].gsub(/(-|\s)/, "_").downcase.to_sym, a["saw_uid_pk"])</p>
+<p>&nbsp;&nbsp;= a["saw_web_answer"]</p>
+</code></p>
+<p>Look a bit weird? I&rsquo;m also doing some crazy stuff for the answer generated from this form. Since I am in oracle and the data is stored using PLSQL procedures (not my choice), I can&rsquo;t use the standard ARObject.save method. In fact, I&rsquo;m not using ActiveRecord as the class base at all. Its actually using ActiveModel and acting like its an ActiveRecord object with a few fake methods to allow me to use it in the form_for helper and get standard AR validations. The class looks like:</p>
+
+<p><code> </code></p>
+<p><code>
+<p>class AnswerValidator &lt; ActiveModel::EachValidator</p>
+<p>&nbsp;&nbsp;def validate_each(record, attribute, value)</p>
+<p>&nbsp;&nbsp; &nbsp;record.errors[attribute] &lt;&lt; (options[:message] || "question not answered") if value.nil? and !record.errors[attribute].include? (options[:message] || "question not answered")</p>
+<p>&nbsp;&nbsp;end</p>
+
+<p>end</p>
+
+<p>class Answer</p>
+<p>&nbsp;&nbsp;include ActiveModel::Validations</p>
+<p>&nbsp;&nbsp;include ActiveModel::AttributeMethods</p>
+
+<p>&nbsp;&nbsp;attr_accessor :id</p>
+
+<p>&nbsp;&nbsp;def to_param</p>
+<p>&nbsp;&nbsp; &nbsp;(id = self.id) ? id.to_s : nil</p>
+<p>&nbsp;&nbsp;end</p>
+
+<p># &nbsp; def to_key</p>
+<p># &nbsp; &nbsp; persisted? ? nil : [id]</p>
+<p># &nbsp; end &nbsp;</p>
+
+<p>&nbsp;&nbsp;#force to always be new</p>
+<p>&nbsp;&nbsp;def new_record?</p>
+<p>&nbsp;&nbsp; &nbsp;true</p>
+<p>&nbsp;&nbsp;end</p>
+
+<p>&nbsp;&nbsp;def set_attributes(values)</p>
+<p>&nbsp;&nbsp; &nbsp;values.each do |k,v|</p>
+<p>&nbsp;&nbsp; &nbsp; &nbsp;self.send "#{k}=".to_sym, v</p>
+<p>&nbsp;&nbsp; &nbsp;end</p>
+<p>&nbsp;&nbsp;end</p>
+
+
+<p>&nbsp;&nbsp;def initialize(questions=nil)</p>
+<p>&nbsp;&nbsp; &nbsp;# create accessor methods</p>
+<p>&nbsp;&nbsp; &nbsp;if questions</p>
+<p>&nbsp;&nbsp; &nbsp; &nbsp;questions.each do |q| &nbsp; &nbsp; &nbsp; &nbsp;</p>
+<p>&nbsp;&nbsp; &nbsp; &nbsp; &nbsp;name = q["sqt_name"].gsub(/(-|\s)/, "_").downcase.to_sym</p>
+
+<p>&nbsp;&nbsp; &nbsp; &nbsp; &nbsp;class_eval {</p>
+<p>&nbsp;&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;attr_accessor name</p>
+<p>&nbsp;&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;validates name, :answer =&gt; true if q['sqt_required_fl']</p>
+<p>&nbsp;&nbsp; &nbsp; &nbsp; &nbsp;}</p>
+<p>&nbsp;&nbsp; &nbsp; &nbsp;end &nbsp; &nbsp;</p>
+<p>&nbsp;&nbsp; &nbsp;end</p>
+<p>&nbsp;&nbsp;end &nbsp;</p>
+
+<p>end</p>
+</code></p>
+<p>As you can see, I have an AnswerValidator class that does the evaluation of the answers returned to make sure all the required which is set to validate for every record where q[&lsquo;sqt_required_fl&rsquo;] is true. (This is the db column that flags if the question requires an answer to be complete).</p>
+
+<p>Now the class_eval section actually dynamically creates a set of attr_accessor methods from the database fields so that I can access the fields as methods (necessary to make the validations form_for driven, since form_for looks for a method (object.attr_name) instead of a hash value (object[:attr_name]). Note: there may be a better way to do this?. Post in the comments if you know how.</p>
+
+<p>The new_record? and to_param methods are needed by form_for as well to figure reference the object and to figure out if it is updating an existing record or creating a new one. The commented code to_key is what to_param becomes in Rails 3.0.0.beta3 (using beta currently).</p>
+
+<p>Because I found issues&hellip;</p>
+
+<p>&hellip;with this app when pushing new code in dev and not restarting the app. Why? Because of what is noted in this thread. Because the forms are being dynamically generated, they are relying on resources created at runtime. If I push new code to my dev server while the app is still running, the classes are dynamically regenerated. Which in turn means all the resources the dynamic form was relying on are now gone and weird call tree errors start showing up. So the real solution to this is in the config/environments/development.rb file, simply change:</p>
+
+<p><code> </code></p>
+<p><code>
+<p>config.cache_classes = false</p>
+<p>#to</p>
+<p>config.cache_classes = true</p>
+</code></p>
+<p>Just don&rsquo;t forget to restart the app every time you push new code :)</p>

@@ -1,0 +1,28 @@
+---
+layout: post
+title: CSS Nav
+published: true
+date: 2010-09-01
+categories: []
+posterous_url: http://blog.hungerandthirstdesign.com/post/1047927728/css-nav
+posterous_slug: post/1047927728/css-nav
+---
+<p>Okay, so maybe this is news to just me, but I&rsquo;ve often struggled in the past to get a good looking login/admin control nav that sits neatly up in the top, right-hand corner of the screen without resorting to the unsightly, hard-to-control css float property. Float tends to bounce, jump, wrap, move at bad times&hellip; like during client demos. Ehem.</p>
+
+<p>[[posterous-content:DDsbprrtgruzBCuyJHig]]</p>
+
+<p>So I found a rather elegant solution from a few other sites. Really all it is is setting two divs:</p>
+
+<p><code>
+<p>&lt;div style="position:relative" ...&gt;</p>
+<p>&nbsp;&nbsp; &nbsp;&lt;div style="position:absolute; top:0; right:0;"</p>
+<p>&nbsp;&nbsp; &nbsp; &nbsp; &nbsp;<a href="http://...">Nav Item 1</a></p>
+<p>&nbsp;&nbsp; &nbsp; &nbsp; &nbsp;<a href="http://...">Nav Item 2</a></p>
+<p>&nbsp;&nbsp; &nbsp;&lt;div&gt;</p>
+<p>&lt;div&gt;</p>
+</code></p>
+<p>The first div simply ensures that the children div respect the relative positioning that you have it in the page. For example, in the image above, the nav is actually sitting down about 200 pixels and left about 400 from the absolute upper right corner. But the absolute tag isn&rsquo;t pushing it to the top right because the relative div around the nav tag keeps it in place. This works for any browser I&rsquo;ve tried it in and is not subject to strange float rules from browser to browser or getting displaced by other block elements.</p>
+
+<p>Enjoy!</p>
+
+<p>Anyone else have other methods out there for doing this?</p>

@@ -1,0 +1,79 @@
+---
+layout: post
+title: First jQuery Hack
+published: true
+date: 2011-07-14
+categories: []
+posterous_url: http://blog.hungerandthirstdesign.com/post/7629350472/first-jquery-hack
+posterous_slug: post/7629350472/first-jquery-hack
+---
+<p>In the last 2-3 days I&rsquo;ve hacked a couple of additions onto two pretty important JS libs for Rails: rails.js (not super substantial) and jQuery. It was a lot of fun to learn the guts of these widely used and not often tampered with libs. As I&rsquo;ve been doing so much js scripting of late, it&rsquo;s gotten really easy to read through js code and understand functionality quickly which is a real help. And when it comes time to patch, finding where it needs to go is simply working through the code flow. The more I contribute to OSS, I find that the best code documentation is the code itself. There&rsquo;s almost nothing so good as good code.</p>
+
+<p>I&rsquo;ve never really delved into the heart of jQuery before, especially over something so central as <code>$.ajax</code>. I&rsquo;ve done the occasional lookup when some of my code is acting up, but today was the day I needed functionality that didn&rsquo;t exist.</p>
+
+<p>As referenced often before in previous blog posts, SalesCrunch is using a wide diversity of technologies to move people around, especially during a live meeting. It&rsquo;s heavily centered around Node.js and Redis to handle async messaging between server and client. Because of this, there are a lot of failure points for us, and without having access to client&rsquo;s browser info, it can be hard to debug beyond the stack traces we get. So I was tasked with setting up a diagnostics page, where you could check all the variables and connections that our servers make to your browser.</p>
+
+<p>It looks something like this:</p>
+
+<p>[[posterous-content:qGwIbbbczJatqpsGjdId]]</p>
+
+<p>We cover a lot of the items we require to use our software: JS, Java, Flash, Socket connectivity, and so on. It was fairly easy to tackled most of them.</p>
+
+<p>Flash: Simply checked if there is a flash plugin installed via the browser&rsquo;s <code>navigator.plugin</code> object. JS is simply populating the field with enabled&hellip; via javascript. If it&rsquo;s disabled, it uses <code>&lt;noscript&gt;</code> tags to populate. Java is a mini-applet that simply provides information on the JVM. Browser and OS info can be determined from the HTTP user-agent request header. We can query our socket (Socket.IO) to see if it&rsquo;s connected or not.</p>
+
+<p>The last one, bandwidth test, was the most interesting, mostly because it involves timing and math skills, both of which I generally fail at. So I inquired of google for some ideas. The general idea is fairly simple: Download something of a known file size and time it. Bandwidth, is after all Mbits per second (not to be confused, as I did earlier with MBytes&hellip; <em>ehem</em>). This should be easy then.</p>
+
+<p>The trick is: It&rsquo;s not entirely easy. Everything you hear about trying to calculate bandwidth by this method is working around server response delays. You can see it pretty quick in Chrome when running locally:</p>
+
+<p>[[posterous-content:voBrdwHqwznsJsAzDwzs]]</p>
+
+<p>Now, the upside is that you don&rsquo;t have to worry about this as much, so long as your file is big enough to make delay negligible and not count for much against the total download time, like so:</p>
+
+<p>[[posterous-content:HvfdsGjdniDfvddthslt]]</p>
+
+<p>As you can see, the waiting time is not a big percentage of the overall download time. However, I wanted to do better, partly out of curiosity, partly out of pursuing excellence. Since I&rsquo;m using jQuery, I figured it shouldn&rsquo;t be too hard to track down a way to detect the first response back from the server. More importantly, I want to know when the actual file data (in this case, a screenshot from Minecraft) is being returned, minus the HTTP header info. Precious bytes&hellip;</p>
+
+<p>Digging into the jQuery code, they do, in fact track a readyState, very similar to the one specified by <a href="http://www.w3.org/TR/XMLHttpRequest/" target="_blank">XMLHttpRequest</a>. This has a number of important states that we care about:</p>
+
+<p>(from <a href="http://www.w3.org/TR/XMLHttpRequest/#states" target="_blank"></a><a href="http://www.w3.org/TR/XMLHttpRequest/#states" target="_blank">http://www.w3.org/TR/XMLHttpRequest/#states</a></p>
+
+<blockquote>
+  <p>The XMLHttpRequest object can be in several states. The readyState attribute must return the current state, which must be one of the following values:</p>
+  
+  <p><strong>UNSENT (numeric value 0)</strong>
+  The object has been constructed.</p>
+  
+  <p><strong>OPENED (numeric value 1)</strong>
+  The open() method has been successfully invoked. During this state request headers &gt; can be set using setRequestHeader() and the request can be made using the send() method.</p>
+  
+  <p><strong>HEADERS_RECEIVED (numeric value 2)</strong>
+  All redirects (if any) have been followed and all HTTP headers of the final response have been received. Several response members of the object are now available.</p>
+  
+  <p><strong>LOADING (numeric value 3)</strong> 
+  The response entity body is being received.</p>
+  
+  <p><strong>DONE (numeric value 4)</strong>
+  The data transfer has been completed or something went wrong during the transfer (e.g. infinite redirects).</p>
+</blockquote>
+
+<p>Now XMLHttpRequest spec calls for an event to fire when these states changes. It&rsquo;s called <code>onreadystatechange</code>. Simple enough. Except for the fact that jQuery ignores and stuffs this event into a sock and leaves it for the moths in a dark closet somewhere, meaning simply: It kills this event and doesn&rsquo;t fire one of its own, stating:</p>
+
+<blockquote class="posterous_short_quote">
+  <p>No onreadystatechange mechanism is provided, however, since success, error, complete and statusCode cover all conceivable requirements.</p>
+</blockquote>
+
+<p>The hell it does.</p>
+
+<p>The problem with jQuery&rsquo;s &ldquo;all conceivable requirements&rdquo; is that my requirement is not &ldquo;before I make the request&rdquo; or &ldquo;after the request is complete&rdquo;. It&rsquo;s somewhere in the middle after I&rsquo;ve made the request when I&rsquo;ve started to receive data back from the server. To be specific, this is state 3: LOADING. So how do we capture this info?</p>
+
+<p>Its actually pretty simple. jQuery, despite not sending an <code>onreadystatechange</code> event, still tracks the right states. While I probably ought to spend time writing the correct event, responding to the states is a bit simpler. So on the current jQuery codebase (on <a href="https://github.com/jquery/jquery" target="_blank">github</a>, I added the following <a href="https://github.com/plukevdh/jquery/commit/33e681ca380a002904a818a949c0f6f8aec16784" target="_blank">optional callbacks</a> (github commit).</p>
+
+<p>So if the states are 2, call <code>receivedHeaders</code>, if 3, call <code>loading</code>. These methods can be set on the <code>$.ajax</code> method <a href="https://gist.github.com/1083594" target="_blank">like so</a>.</p>
+
+<p>This way we can then grab the <code>startTime</code> for the download when we are receiving the known data back from the server (<code>loading</code>) and the end time on <code>success</code>. In the end, this was more than we really wanted to do, since it is unlikely that jQuery will accept this patch into the code base as it explicitly claims no support for <code>onreadystatechange</code>. Therefore, we&rsquo;re using vanilla jQuery and allowing for error in our results. It&rsquo;s not like it needed to be perfect. I just ended up being curious.</p>
+
+<p>One other thing to note (pointed out to me by <a href="http://twitter.com/tjsingleton" target="_blank">@tjsingleton</a>) if you are doing what you ought to do and make multiple requests so that you can average the results, you will need to stagger your async requests, otherwise your browser may get tied up trying to make too many requests at once and add more artificial delay. In other words, don&rsquo;t request all 10-50 samples at once. I staggered the requests to two at a time for ten requests total for a decent average. I used jQuery&rsquo;s deferreds to trigger more requests once the two images have completed. This wouldn&rsquo;t be necessary, however in the case that you used the above method to capture start/end times once actual data is being retrieved.</p>
+
+<p>I may generalize the code and post it at some point in the future since it&rsquo;s pretty nifty.</p>
+
+<p><strong>Edit:</strong> I&rsquo;ve submitted my initial patch to jQuery for consideration. You can track it <a href="https://github.com/jquery/jquery/pull/438" target="_blank">here</a> and on the <a href="http://bugs.jquery.com/ticket/9883" target="_blank">jQuery bug tracker</a></p>

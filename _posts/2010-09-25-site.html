@@ -1,0 +1,22 @@
+---
+layout: post
+title: Site
+published: true
+date: 2010-09-25
+categories: []
+posterous_url: http://blog.hungerandthirstdesign.com/post/1183754580/site
+posterous_slug: post/1183754580/site
+---
+<p>Finally made the first of many updates to my site. Color scheme change is next. Or maybe the reskinning of this blog?</p>
+<p>[[posterous-content:joHjmiixqBsCjuFAywmu]]</p>
+<p>In any case, I&rsquo;m now with <a href="http://www.webbynode.com/" target="_blank">webbynode</a>. I figured if anything, my site ought to be the first one to make a switch as I&rsquo;m getting a little discontent with Heroku&rsquo;s availability some days. Moreover, their charges for additional services are getting outrageous.&nbsp;</p>
+<p>It&rsquo;s not incredibly difficult to setup. Definitely some changes over Heroku, who I must say still have one of the best deploy workflows out there. But what is incredibly valuable is I now have root access to the server, which means I can do just about anything I want to it. I can kill it in cold blood if I want. Big. Fat. &ldquo;shutdown -t now&rdquo;, But lets not get hasty&hellip;</p>
+<p>The big benefit is I can now run Node.JS, Redis, MongoDB, custom ruby tasks, cron jobs&hellip; anything I want&hellip; for free. Heroku is charging an arm and a leg for that&nbsp;privilege.&nbsp;</p>
+<p>So first is migrating everything from heroku. Not hard. Webby is not as well documented, but its not too hard using the preconfigured Linux stacks. They even have Rails 3 (in fact I hear they were one of the first web hosts to support the beta).&nbsp;</p>
+<p>A few minor complaints thus far. You can&rsquo;t include your database.yml in the lineup or it complains. Also when using mysql, you are forced to use the old mysql gem rather than the shiny new mysql2 gem which has a lot going on. The fix for this currently is just to update it by hand post-install.</p>
+<p>Besides that and some trouble figuring out how to ssh into the thing (simply due to lack of documentation), <a href="http://hungerandthirstdesign.com" target="_blank">hungerandthirstdesign.com</a>&nbsp;is running like a champ. Moreover, I can now run some other images processors (setup to thumbnail images for <a href="http://peerdrum.com" target="_blank">Peerdrum.com</a>) that I had running on an EC2 instance over here now, which is pretty freaking awesome since EC2 costs me $60/mo. to run with no real usage out of it. So that&rsquo;s a big deal.</p>
+<p>Because of my work supporting Hargray&rsquo;s custom linux rails server stack, I know how to do custom scaling and failover for these machines and while having Heroku&rsquo;s slider based scaling system is nice, doing it my own way is nicer.&nbsp;</p>
+<p>New experiment too: Trying on Nginx for the first time. Running passenger on top of that for now. Seems like a really clean way to do web server configuration. I like. Seems fast enough. Consumes very little memory which is good on my lower-end node.</p>
+<p>So all in all, I like Webbynode so far. I&rsquo;ll be interested to start integrating more stuff into it like Redis or some other db backend. I guess in a sentence to sum it up: root access is awesome.</p>
+
+<p>[[posterous-content:CFejrabuxquhwCGliICa]]</p>

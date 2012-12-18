@@ -1,0 +1,64 @@
+---
+layout: post
+title: Podcasting, skip_filter and Hastie progress
+published: true
+date: 2010-09-01
+categories: []
+posterous_url: http://blog.hungerandthirstdesign.com/post/1047807839/podcasting-skip-filter-and-hastie-progress
+posterous_slug: post/1047807839/podcasting-skip-filter-and-hastie-progress
+---
+<p><span>Hastie update</span></p>
+
+<p>Well an interesting weekend for sure. <a href="http://hastie-app.com/" target="_blank">Hastie</a> is still coming along. Did some really stupid stuff while working on it late one night whilst trying to integrate facebook connectivity. <a href="http://github.com/mmangino" target="_blank">mmangino&rsquo;s</a> amazing <a href="http://github.com/mmangino/facebooker" target="_blank">Facebooker</a> plugin for Rails works really well if you follow the instructions. Warning: DO NOT ADD &ldquo;require &lsquo;facebooker&rsquo;&rdquo; anywhere in the code. It creates traceless stack crashes which are never fun to debug at 2 in the morning. I ended up resetting my database in an attempt to solve it and deleted some important static data I was holding there. Still kicking myself over that one. In any case, Hastie is coming right along. I should be posting a major update later this week.</p>
+
+<p>[[posterous-content:qvkknybAgwjmaIoDcICG]]</p>
+
+<h2>skip_filter</h2>
+
+<p>But this isn&rsquo;t a post about Hastie. Wanted to post just some interesting things I learn about Rails as I go along on some various projects. Hargray Communication has a massive Oracle database that I have to write my apps against. Oracle is not particularly &ldquo;Rails-friendly&rdquo; although its more the fact that our db schema/naming conventions are not Rails approved. So it always takes a lot of wrangling. Why is this a problem? Well, because our user tables are set in stone, most of the nice authentication plugins out there (<a href="http://github.com/binarylogic/authlogic" target="_blank">authlogic</a>, <a href="http://github.com/technoweenie/restful-authentication" target="_blank">restful-authentication</a>) don&rsquo;t work (at least by default) with our db schemas. Therefore, I end up writing a lot of custom authenticators. I suppose the cool thing to do would be to fork and mod something like authlogic to work with our databases, which thinking about that now, wouldn&rsquo;t be too hard since it would mostly involve removing functionality. But anyways, I wrote a very simple auth system using almost exclusively filters. Take a look!</p>
+<p><code> </code></p>
+<p><code>
+<p>#application_controller.rb</p>
+<p>&nbsp;&nbsp;before_filter :deny_access, :unless =&gt; :logged_in?</p>
+<p>&nbsp;&nbsp;private</p>
+<p>&nbsp;&nbsp;def deny_access</p>
+<p>&nbsp;&nbsp; &nbsp;flash[:notice] = "You cannot access that page without logging in first."</p>
+<p>&nbsp;&nbsp; &nbsp;redirect_to "/"</p>
+<p>&nbsp;&nbsp;end</p>
+<p>&nbsp;&nbsp;def logged_in?</p>
+<p>&nbsp;&nbsp; &nbsp;session[:username]</p>
+<p>&nbsp;&nbsp;end</p>
+<p>#session_controller.rb</p>
+<p>&nbsp;&nbsp;skip_filter :deny_access</p>
+</code></p>
+<p>The session controller can simply skip the auth filter on all of its actions while ensuring that every other action in the application checks that we have a user logged in. We could add conditions to the skip filter if there were other session actions that only an authorized user would be allowed to access, but all I do in the session controller for now is login and logout. I previously hadn&rsquo;t realized that skip_filter worked on methods outside of its own controller. So that&rsquo;s pretty slick.</p>
+
+<h2>Podcasting</h2>
+
+<p>Added podcast hosting/upload ability to theLowCountry Community Church website yesterday. Took a few hours, but it really wasn&rsquo;t super difficult.</p>
+<p>[[posterous-content:bDBGxbjkylFkfzCbfEap]]</p>
+<p>The image above is a placeholder for what a podcast entry on the page looks like. You can actually subscribe to the feed in iTunes under the &ldquo;Advance &gt; Subscribe to Podcast&rdquo; option. I expect it will take some time to show up in the iTunes store podcast listing (submitted yesterday). I didn&rsquo;t realize until I started researching this project, but a podcast feed is just an XML rss feed. Ours is found <a href="http://www.lowcountrycc.org/podcasts.xml?location=hiltonhead" target="_blank">here</a>. It just involves a mess of description tags. Our files are actually being hosted on Amazon S3 (for less than 5 cents a month) and I&rsquo;m pretty stoked with how easy the whole thing was. A lot of the more dynamic content is stored there simply because its so easy to upload the images/audio there. The <a href="http://github.com/marcel/aws-s3" target="_blank">aws-s3</a> gem is fantastic for accomplishing the uploading/linking files. A bit of a gotcha in the whole process is ensuring that the files are accessible to the general public with no authentication required. otherwise iTunes complains. Its pretty simple though. My upload and link generating methods look like this:</p>
+
+<p><code>
+<p>&nbsp;&nbsp;def get_podcast_image(name)</p>
+<p>&nbsp;&nbsp; &nbsp;# :authenticated =&gt; false ensures that the urls</p>
+<p>&nbsp;&nbsp; &nbsp;# returned for the object don't have the weird auth keys included</p>
+<p>&nbsp;&nbsp; &nbsp;AWS::S3::S3Object.url_for(name, "podcast_images", :authenticated =&gt; false)</p>
+<p>&nbsp;&nbsp;end</p>
+
+<p>&nbsp;&nbsp;def self.upload_podcast_image(name, url)</p>
+
+<p>&nbsp;&nbsp; &nbsp;if !url.nil? and !name.empty?</p>
+<p>&nbsp;&nbsp; &nbsp; &nbsp;# in order for the :authenticated =&gt; false to work,&nbsp;</p>
+<p>&nbsp;&nbsp; &nbsp; &nbsp;# we need to upload the files with access opened to the public.&nbsp;</p>
+<p>&nbsp;&nbsp; &nbsp; &nbsp;# :access =&gt; :public_read accomplishes this</p>
+<p>&nbsp;&nbsp; &nbsp; &nbsp;AWS::S3::S3Object.store(name, open(url), "podcast_images", :access =&gt; :public_read)</p>
+<p>&nbsp;&nbsp; &nbsp; &nbsp;true</p>
+<p>&nbsp;&nbsp; &nbsp;else</p>
+<p>&nbsp;&nbsp; &nbsp; &nbsp;"Missing information with this podcast."</p>
+<p>&nbsp;&nbsp; &nbsp;end</p>
+<p>&nbsp;&nbsp;end</p>
+</code></p>
+<p>In any case, this works beautifully and hopefully before much longer, you&rsquo;ll be able to get all the sermons from LowCountry Community Church online or through iTunes. And semi-awesome side note, the audio player seen in the screenshot above is the html5 &ldquo;audio&rdquo; tag at work! Works really well in Safari and Chrome. So far no Firefox love. Hopefully that&rsquo;ll come soon.</p>
+
+<p>I realize I have no comments section here yet. I&rsquo;ll work at that as well as an RSS feed soon, but if you have any comments, please email me at hungerandthirst[at]gmail[dot]com.</p>

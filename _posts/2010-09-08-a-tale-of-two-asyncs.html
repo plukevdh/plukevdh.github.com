@@ -1,0 +1,27 @@
+---
+layout: post
+title: A tale of two asyncs...
+published: true
+date: 2010-09-08
+categories: []
+posterous_url: http://blog.hungerandthirstdesign.com/post/1086573384/a-tale-of-two-asyncs
+posterous_slug: post/1086573384/a-tale-of-two-asyncs
+---
+<p>My latest project has been a really interesting one for being thrown back to fundamental programming problems mixed in with some really fascinating tools. First, some history.</p>
+<p><strong>[Partly excerpted from the project README]</strong></p>
+
+<p>There are a number of projects I can think of where a job that takes longer than&nbsp;a user ought to be waiting for a result (due to server timeout length or out of&nbsp;simple app responsiveness courtesy to the user). At the same time I need the result of the&nbsp;operation to be returned to the user.</p>
+<p>Here&rsquo;s a real-world example. I work with a set of legacy Oracle databases that&nbsp;stores much of our business logic as PLSQL procedures. Yes, this is not &ldquo;The&nbsp;Rails Way&trade;&rdquo; but it&rsquo;s the only way for the company I work for right now.&nbsp;Many of the procedures that I run as part of several of the applications I&nbsp;support can take on average one minute or more with a standard deviation of&nbsp;almost 2 minutes (with a forced timeout of 5 minutes). That&rsquo;s kinda a long time&nbsp;to sit and wait on a web app regardless of what web app we&rsquo;re talking about.</p>
+
+<p>[[posterous-content:olburAEvomACaqifsxgl]]</p>
+
+
+<p>We don&rsquo;t really want users sitting waiting for up to 5 minutes (at which it forces&nbsp;failure) unable to do anything or (even worse) hitting refresh or the action&nbsp;again. Especially bad when this can mean the HTTP server is getting backed up&nbsp;as more and more people run these long running processes.</p>
+<p>Moreover, the users need to get response from the completed job before moving&nbsp;on. Most job processors (DJ, Resque) are setup for running jobs that do not&nbsp;require the result to be returned to the web app (think mass-mailers, queue&nbsp;population, image resizing). They just run and the output goes to a database,&nbsp;an inbox or a file server.</p>
+<p><a href="http://github.com/plukevdh/kthxbye" target="_blank">Kthxbye</a> is an attempt to solve this problem. It is based heavily off of&nbsp;Resque, so much so that one might wonder why not just hack Resque or write a plugin for it? Simply put, I&rsquo;m very interested in distributed programming. I wanted to try my hand at this. Secondly though, I haven&rsquo;t had much time to play with these new NoSQL dbs such as Redis and this is a good opportunity to take it for a spin. Lastly, I&rsquo;m interested in async and evented programming.&nbsp;</p>
+<p>One thing a number of the distributed/delayed/backend processors do is run things in separate processes. Resque in particular does this (pointed out only because I&rsquo;ve dug into the Resque code more than others). I&rsquo;m not a huge fan of spawning out additional processes.&nbsp;In Ruby, there are really two main ways to do asynchronous processing on a single machine:</p>
+<ol>
+<li>The Parent/Children Model = Spawning multiple processes</li>
+<li>The Fiber Model = Programmer-Controlled Threads</li>
+</ol><p>Ruby has threads but due to the infamous GIL, Ruby&rsquo;s solution to forcing thread-safety, we&rsquo;re really locked out of threading like we ought to be (Queue up fun graphs and a <a href="http://www.igvita.com/2008/11/13/concurrency-is-a-myth-in-ruby/" target="_blank">better&nbsp;</a>explanation). This is unless you run JRuby which uses Java&rsquo;s much more satisfactory threading API. Firing up an additional ruby instance is pretty costly as it means you are running multiple instances of the Ruby interpreter. And why do that when we have threads good threads, albeit manually-managed threads. Rails is <a href="http://yehudakatz.com/2010/09/07/automatic-flushing-the-rails-3-1-plan/" target="_blank">about to go fiber&rsquo;d in 3.1</a>, so why not Kthxbye? So part of this awesome hack project is to implement a distributed, &ldquo;async&rdquo;, delayed job processor using Redis and Ruby Fibers and to learn how to control my threads manually, something all good programmers should be able to do anyways.</p>
+<p>Please check out my progress via the <a href="http://github.com/plukevdh/kthxbye/commits/master" target="_blank">Github changelog</a>&nbsp;and jump in with any suggestions, feedback or patches! Keep in mind this is still very early stage and experimental, but it could be awesome.</p>

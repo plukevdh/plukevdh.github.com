@@ -1,0 +1,14 @@
+---
+layout: post
+title: Rails 3 Gotcha
+published: true
+date: 2010-10-27
+categories: []
+posterous_url: http://blog.hungerandthirstdesign.com/post/1412661181/rails-3-gotcha
+posterous_slug: post/1412661181/rails-3-gotcha
+---
+<p>This is a new one. Ran into this whilst deploying a new server tonight. Rails 3 defaults to use XSendfile to force the HTTP server (Apache/Nginx) to handle all static file sends.</p>
+<p>So here&rsquo;s the deal, this fun little Apache module is buried deep in the pages of the interwebs. It&rsquo;s not super well known or documented.</p>
+<p>So for my everyone&rsquo;s peace of mind, the docs and source can be found here: <a href="https://tn123.org/mod_xsendfile/" target="_blank">https://tn123.org/mod_xsendfile/</a></p>
+<p>The trouble is what happens when you try to use send_file, is Rails will handle the request perfectly, down to renaming the very empty file you just sent the user when XSendfile is not installed, enabled or properly configured. Its not hard, its just not easily documented or discovered. So after almost an hour of trying to remember how I fixed this, I ran into <a href="http://efreedom.com/Question/1-3724853/Rails-Sends-Byte-Files-Using-Send-File" target="_blank">this article</a>, which details the exact same problem/output I saw.</p>
+<p>Updated, configured, fixed. Thanks internets.</p>

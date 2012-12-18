@@ -1,0 +1,42 @@
+---
+layout: post
+title: ! 'Three Weeks of... '
+published: true
+date: 2011-01-25
+categories: []
+posterous_url: http://blog.hungerandthirstdesign.com/post/2925231760/three-weeks-of
+posterous_slug: post/2925231760/three-weeks-of
+---
+<p>Today marks two and a half weeks into a major enhancement to <a href="http://www.crunchconnect.com/" target="_blank">CrunchConnect</a>, one of the biggest pieces of the products <a href="http://salescrunch.com" target="_blank">SalesCrunch</a> is putting forward.</p>
+
+<p>First let me preface this by saying that <a href="http://twitter.com/tjsingleton" target="_blank">TJ Singleton</a> is a god at JavaScript and pretty much anything else. He&rsquo;s almost single-handedly written the NodeJS backend and Redis/Node ORM for this project and on top of that given me all the right answers to what I so poorly understand about our adventures into JS-only server-client code. Also <a href="http://twitter.com/databyte" target="_blank">David Sommers</a> and <a href="http://twitter.com/gabimoore" target="_blank">Gabi Moore</a> have done an amazing job putting together the amazing interface design we have and its going to blow any other online, community presentation webapp you&rsquo;ve seen away). For realz.</p>
+
+<p>Second, this product is going to be awesome. If you have anything to do with sales or online presentations to clients, etc., signup for the beta <a href="http://www.crunchconnect.com/signup" target="_blank">RIGHT NOW</a>. Feel free to ask for invites in the comments and I&rsquo;ll do what I can to help you out!</p>
+
+<h3>Okay so on to the layers.</h3>
+
+<p>For the past 2.5 weeks we&rsquo;ve been hammering away at a slick JS system that is comprised of a NodeJS server that has a custom, built-in Redis ORM for managing users, meetings, and presentations (including the states of each of those objects). Its been such a trip and I&rsquo;ve learned so much about what JS can do and is capable of, I figured I&rsquo;d chronicle some of the trip here.</p>
+
+<p>So I&rsquo;m a Ruby developer through and through, and something TJ commented early on about was that Rails has a bad way of bending your mind to a singular way of thinking about MVC. Rails handles the MVC pattern extremely well and separates it out really cleanly. But MVC is not Rails-specific, nor is the way Rails does MVC the only way to do a MVC pattern.</p>
+
+<p>In steps JavaScript without a lot of form, figure or complication and a crapload of speed. We use jQuery for interface interaction, and Socket.IO and Redis Pub/Sub to do a lot of our communication with the Node server. From there, we&rsquo;re pretty much on our own as far as existing technologies. We&rsquo;re using <a href="http://pivotal.github.com/jasmine" target="_blank">Jasmine</a> on the client side and <a href="http://vowsjs.org" target="_blank">Vows</a> on the server side to test, which has helped or code consistency and reliability and torn our productivity to shreds (at times).</p>
+
+<h3>The Implementation</h3>
+
+<p>TJ and I started paring on the ORM. He wrote, I pretty much watched, checked and gave color-commentary as we moved along. Pretty simple and modeled amazingly closely to ActiveRecord&rsquo;s way of things. Anything from has_many to has_and_belongs_to_many, we have it. What&rsquo;s even cooler is it backends to Redis, so its pee-your-pants fast. This was all built in Node (via CoffeeScript I might add). We talked about open-sourcing it, but we&rsquo;ll see where that goes.</p>
+
+<p>From here TJ has handled most of the Node implementation while I&rsquo;ve worked on client side in step with him so that as different parts of the protocol came together, I could send events, he could respond to them and we could both test each other&rsquo;s code as we wrote it. I also worked at the same time to integrate the Node responders with the interface as it was built out so that we could see things happening like they would during a live meeting. Seeing stuff happen on an interface rather than just in a command-line interface can make a world of difference on your morale, especially when you&rsquo;re writing Javascript.</p>
+
+<p>Our server/client setup is very much state-driven. Node is built around an evented paradigm, so our implementation of a server-client system is almost entirely evented. We send requests, the server sends response events back or schedules event jobs (via Resque) to update data in our DBMS database. So all in all, if nothing is happening on the client, neither is anything going on on the server. Saves us a ton of bandwidth, memory and CPU cycles.</p>
+
+<p>As I mentioned, we are using Socket.IO as our primary communication transport, which means signals to and from the client/server happen in milliseconds after being triggered. This is important as this system handles everything from our chat service (a system which generally allows some latency) to our user status and presence UI control, to our conference calling UI updates and controls which needs to transmit to hundreds of people at the same time. Our protocol by which we pass messages is also extremely small. We&rsquo;ve made it very generic and kept data passed back and forth to a minimum using JSON in a very basic form to keep data across the wire low.</p>
+
+<h3>Javascript</h3>
+
+<p>Javascript is a weird beast. It mimics both functional and OO langages. And the object design paradigms change radically from what I have been used to in Ruby/Rails. Moreover, all the &ldquo;magic&rdquo; Rails handles for you is gone when dealing with UI or request routing. Beyond that, we&rsquo;re integrating the JS client with our Rails app so there&rsquo;s a fair amount of Ajax data getting and setting going on. I&rsquo;ve never written much .bind/.trigger stuff before. But our whole system is built around triggering the client based on events bound to the protocol we wrote, in large part based around a simplified set of the the IRC protocol. We use callbacks a lot to simplify, &ldquo;genericize&rdquo; and asynchronize the general operation of the communication lifecycle. It makes it harder to track how a request flows through the system, but makes it much easier to maintain individual parts of the request cycle and makes it flexible in extending it to respond to new requests as we expand the feature-set of the product. This is what the Rails core team worked towards in Rails 3 and is a pattern we worked to follow in our own way.</p>
+
+<h3>Summarize</h3>
+
+<p>Writing something like a chat app isn&rsquo;t that hard. But when you actually need to track users in specific rooms, integrate that with conference calling, connectivity/presence tracking, admin control over users and presentations and rooms, it just gets crazy.</p>
+
+<p>But we&rsquo;re doing it. And its going to be awesome, not only in the incredible backend we&rsquo;re working on, but in the beautiful interface that we&rsquo;re supporting and integrating into. SalesCrunch is an awesome company with amazing minds at work, and CrunchConnect is going to be one hell of a product.</p>
