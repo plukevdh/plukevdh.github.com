@@ -7,7 +7,7 @@ categories: []
 posterous_url: http://blog.hungerandthirstdesign.com/post/1243153618/ie-gotcha-4-ie7-edition
 posterous_slug: post/1243153618/ie-gotcha-4-ie7-edition
 ---
-<p>[[posterous-content:GftujlwFpHolACdCAumG]]In an ongoing attempt to alert the general public to all the downfalls you suffer when you use IE I continue the series: IE Gotchas. I haven&rsquo;t hit any major ones in a while, but this is a weird one.</p>
+<p>In an ongoing attempt to alert the general public to all the downfalls you suffer when you use IE I continue the series: IE Gotchas. I haven&rsquo;t hit any major ones in a while, but this is a weird one.</p>
 <p>IE7 (and maybe before?) doesn&rsquo;t give you the &ldquo;JSON&rdquo; object with which to manipulate json objects. Whaaat?</p>
 <p>Simple solution is to require a conditional comment to include <a href="http://code.google.com/p/webscan/source/browse/trunk/ui/js/third-party/json2.min.js?spec=svn80&amp;r=80" target="_blank">this</a> file somewhere. Then you&rsquo;re fine.</p>
 <p><code>&lt;!-- [if lte IE 7]&gt; &lt;script src="http://webscan.googlecode.com/svn-history/r80/trunk/ui/js/third-party/json2.min.js" type="text/javascript"&gt;&lt;/script&gt; &lt;![endif] --&gt;</code></p>

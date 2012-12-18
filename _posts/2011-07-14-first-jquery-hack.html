@@ -13,25 +13,17 @@ posterous_slug: post/7629350472/first-jquery-hack
 
 <p>As referenced often before in previous blog posts, SalesCrunch is using a wide diversity of technologies to move people around, especially during a live meeting. It&rsquo;s heavily centered around Node.js and Redis to handle async messaging between server and client. Because of this, there are a lot of failure points for us, and without having access to client&rsquo;s browser info, it can be hard to debug beyond the stack traces we get. So I was tasked with setting up a diagnostics page, where you could check all the variables and connections that our servers make to your browser.</p>
 
-<p>It looks something like this:</p>
-
-<p>[[posterous-content:qGwIbbbczJatqpsGjdId]]</p>
-
 <p>We cover a lot of the items we require to use our software: JS, Java, Flash, Socket connectivity, and so on. It was fairly easy to tackled most of them.</p>
 
 <p>Flash: Simply checked if there is a flash plugin installed via the browser&rsquo;s <code>navigator.plugin</code> object. JS is simply populating the field with enabled&hellip; via javascript. If it&rsquo;s disabled, it uses <code>&lt;noscript&gt;</code> tags to populate. Java is a mini-applet that simply provides information on the JVM. Browser and OS info can be determined from the HTTP user-agent request header. We can query our socket (Socket.IO) to see if it&rsquo;s connected or not.</p>
 
 <p>The last one, bandwidth test, was the most interesting, mostly because it involves timing and math skills, both of which I generally fail at. So I inquired of google for some ideas. The general idea is fairly simple: Download something of a known file size and time it. Bandwidth, is after all Mbits per second (not to be confused, as I did earlier with MBytes&hellip; <em>ehem</em>). This should be easy then.</p>
 
-<p>The trick is: It&rsquo;s not entirely easy. Everything you hear about trying to calculate bandwidth by this method is working around server response delays. You can see it pretty quick in Chrome when running locally:</p>
+<p>The trick is: It&rsquo;s not entirely easy. Everything you hear about trying to calculate bandwidth by this method is working around server response delays.</p>
 
-<p>[[posterous-content:voBrdwHqwznsJsAzDwzs]]</p>
+<p>Now, the upside is that you don&rsquo;t have to worry about this as much, so long as your file is big enough to make delay negligible and not count for much against the total download time</p>
 
-<p>Now, the upside is that you don&rsquo;t have to worry about this as much, so long as your file is big enough to make delay negligible and not count for much against the total download time, like so:</p>
-
-<p>[[posterous-content:HvfdsGjdniDfvddthslt]]</p>
-
-<p>As you can see, the waiting time is not a big percentage of the overall download time. However, I wanted to do better, partly out of curiosity, partly out of pursuing excellence. Since I&rsquo;m using jQuery, I figured it shouldn&rsquo;t be too hard to track down a way to detect the first response back from the server. More importantly, I want to know when the actual file data (in this case, a screenshot from Minecraft) is being returned, minus the HTTP header info. Precious bytes&hellip;</p>
+<p>The waiting time is not a big percentage of the overall download time. However, I wanted to do better, partly out of curiosity, partly out of pursuing excellence. Since I&rsquo;m using jQuery, I figured it shouldn&rsquo;t be too hard to track down a way to detect the first response back from the server. More importantly, I want to know when the actual file data (in this case, a screenshot from Minecraft) is being returned, minus the HTTP header info. Precious bytes&hellip;</p>
 
 <p>Digging into the jQuery code, they do, in fact track a readyState, very similar to the one specified by <a href="http://www.w3.org/TR/XMLHttpRequest/" target="_blank">XMLHttpRequest</a>. This has a number of important states that we care about:</p>
 
@@ -39,19 +31,19 @@ posterous_slug: post/7629350472/first-jquery-hack
 
 <blockquote>
   <p>The XMLHttpRequest object can be in several states. The readyState attribute must return the current state, which must be one of the following values:</p>
-  
+
   <p><strong>UNSENT (numeric value 0)</strong>
   The object has been constructed.</p>
-  
+
   <p><strong>OPENED (numeric value 1)</strong>
   The open() method has been successfully invoked. During this state request headers &gt; can be set using setRequestHeader() and the request can be made using the send() method.</p>
-  
+
   <p><strong>HEADERS_RECEIVED (numeric value 2)</strong>
   All redirects (if any) have been followed and all HTTP headers of the final response have been received. Several response members of the object are now available.</p>
-  
-  <p><strong>LOADING (numeric value 3)</strong> 
+
+  <p><strong>LOADING (numeric value 3)</strong>
   The response entity body is being received.</p>
-  
+
   <p><strong>DONE (numeric value 4)</strong>
   The data transfer has been completed or something went wrong during the transfer (e.g. infinite redirects).</p>
 </blockquote>

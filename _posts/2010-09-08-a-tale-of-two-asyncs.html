@@ -13,8 +13,6 @@ posterous_slug: post/1086573384/a-tale-of-two-asyncs
 <p>There are a number of projects I can think of where a job that takes longer than&nbsp;a user ought to be waiting for a result (due to server timeout length or out of&nbsp;simple app responsiveness courtesy to the user). At the same time I need the result of the&nbsp;operation to be returned to the user.</p>
 <p>Here&rsquo;s a real-world example. I work with a set of legacy Oracle databases that&nbsp;stores much of our business logic as PLSQL procedures. Yes, this is not &ldquo;The&nbsp;Rails Way&trade;&rdquo; but it&rsquo;s the only way for the company I work for right now.&nbsp;Many of the procedures that I run as part of several of the applications I&nbsp;support can take on average one minute or more with a standard deviation of&nbsp;almost 2 minutes (with a forced timeout of 5 minutes). That&rsquo;s kinda a long time&nbsp;to sit and wait on a web app regardless of what web app we&rsquo;re talking about.</p>
 
-<p>[[posterous-content:olburAEvomACaqifsxgl]]</p>
-
 
 <p>We don&rsquo;t really want users sitting waiting for up to 5 minutes (at which it forces&nbsp;failure) unable to do anything or (even worse) hitting refresh or the action&nbsp;again. Especially bad when this can mean the HTTP server is getting backed up&nbsp;as more and more people run these long running processes.</p>
 <p>Moreover, the users need to get response from the completed job before moving&nbsp;on. Most job processors (DJ, Resque) are setup for running jobs that do not&nbsp;require the result to be returned to the web app (think mass-mailers, queue&nbsp;population, image resizing). They just run and the output goes to a database,&nbsp;an inbox or a file server.</p>
